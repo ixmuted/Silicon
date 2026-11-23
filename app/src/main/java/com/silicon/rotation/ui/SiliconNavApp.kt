@@ -57,15 +57,20 @@ fun SiliconNavApp(
     }
     var tileAdded by rememberSaveable { mutableStateOf(false) }
 
-    var route by rememberSaveable {
+    var routeName by rememberSaveable {
         mutableStateOf(
-            if (openSetupInitially || !accessibilityEnabled) SiliconRoute.SETUP else SiliconRoute.HOME
+            if (openSetupInitially || !accessibilityEnabled) SiliconRoute.SETUP.name else SiliconRoute.HOME.name
         )
+    }
+    val route = when (routeName) {
+        SiliconRoute.SETUP.name -> SiliconRoute.SETUP
+        SiliconRoute.SETTINGS.name -> SiliconRoute.SETTINGS
+        else -> SiliconRoute.HOME
     }
 
     LaunchedEffect(openSetupSignal) {
         if (openSetupSignal > 0) {
-            route = SiliconRoute.SETUP
+            routeName = SiliconRoute.SETUP.name
         }
     }
 
@@ -111,7 +116,7 @@ fun SiliconNavApp(
     }
 
     BackHandler(enabled = route != SiliconRoute.HOME) {
-        route = SiliconRoute.HOME
+        routeName = SiliconRoute.HOME.name
     }
 
     SiliconTheme(
@@ -136,8 +141,8 @@ fun SiliconNavApp(
                         }
                     },
                     onAutoDisableChange = { RotationController.setAutoDisableOnLeaveApp(context, it) },
-                    onOpenSettings = { route = SiliconRoute.SETTINGS },
-                    onOpenSetup = { route = SiliconRoute.SETUP }
+                    onOpenSettings = { routeName = SiliconRoute.SETTINGS.name },
+                    onOpenSetup = { routeName = SiliconRoute.SETUP.name }
                 )
 
                 SiliconRoute.SETUP -> SetupScreen(
@@ -146,7 +151,7 @@ fun SiliconNavApp(
                     phonePermissionGranted = phonePermissionGranted,
                     notificationPermissionGranted = notificationPermissionGranted,
                     tileAdded = tileAdded,
-                    onBack = { route = SiliconRoute.HOME },
+                    onBack = { routeName = SiliconRoute.HOME.name },
                     onEnableAccessibility = { SystemIntegration.openAccessibilitySettings(context) },
                     onAddQuickSettingsTile = addTileAction,
                     onRequestPhonePermission = {
@@ -162,8 +167,8 @@ fun SiliconNavApp(
                 SiliconRoute.SETTINGS -> SettingsScreen(
                     state = state,
                     accessibilityEnabled = accessibilityEnabled,
-                    onBack = { route = SiliconRoute.HOME },
-                    onOpenSetup = { route = SiliconRoute.SETUP },
+                    onBack = { routeName = SiliconRoute.HOME.name },
+                    onOpenSetup = { routeName = SiliconRoute.SETUP.name },
                     onAddQuickSettingsTile = addTileAction,
                     onPinBarWidget = {
                         if (!SystemIntegration.requestPinBarWidget(context)) {
