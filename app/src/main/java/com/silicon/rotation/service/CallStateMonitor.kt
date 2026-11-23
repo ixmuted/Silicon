@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.silicon.rotation.service
 
 import android.Manifest
@@ -16,7 +18,6 @@ class CallStateMonitor(
     private val telephonyManager = context.getSystemService(TelephonyManager::class.java)
     private var registered = false
     private var modernCallback: Any? = null
-    @Suppress("DEPRECATION")
     private var legacyListener: PhoneStateListener? = null
 
     fun start() {
@@ -35,16 +36,14 @@ class CallStateMonitor(
             telephonyManager.registerTelephonyCallback(context.mainExecutor, callback)
             modernCallback = callback
         } else {
-            @Suppress("DEPRECATION")
             val listener = object : PhoneStateListener() {
-                @Deprecated("Deprecated in Java")
+                @Suppress("OVERRIDE_DEPRECATION")
                 override fun onCallStateChanged(state: Int, phoneNumber: String?) {
                     val inCall = state == TelephonyManager.CALL_STATE_RINGING ||
                         state == TelephonyManager.CALL_STATE_OFFHOOK
                     onCallStateChanged(inCall)
                 }
             }
-            @Suppress("DEPRECATION")
             telephonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE)
             legacyListener = listener
         }
@@ -60,7 +59,6 @@ class CallStateMonitor(
             }
             modernCallback = null
         } else {
-            @Suppress("DEPRECATION")
             legacyListener?.let {
                 telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE)
             }
