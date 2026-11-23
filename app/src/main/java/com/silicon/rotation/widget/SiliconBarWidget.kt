@@ -2,8 +2,9 @@ package com.silicon.rotation.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -20,16 +21,13 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
-import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
-import androidx.glance.text.FontWeight
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
 import com.silicon.rotation.MainActivity
 import com.silicon.rotation.R
 import com.silicon.rotation.data.OrientationMode
@@ -40,8 +38,8 @@ class SiliconBarWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         RotationController.initialize(context)
-        val state = RotationController.state.value
         provideContent {
+            val state by RotationController.state.collectAsState()
             GlanceTheme {
                 BarWidgetContent(state)
             }
@@ -50,120 +48,78 @@ class SiliconBarWidget : GlanceAppWidget() {
 
     @Composable
     private fun BarWidgetContent(state: RotationState) {
-        val isActive = state.isActive
-        val containerColor = if (isActive) {
-            GlanceTheme.colors.primaryContainer
-        } else {
-            GlanceTheme.colors.widgetBackground
-        }
-        val onContainerColor = if (isActive) {
-            GlanceTheme.colors.onPrimaryContainer
-        } else {
-            GlanceTheme.colors.onSurface
-        }
         Row(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .cornerRadius(28.dp)
-                .background(containerColor)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .cornerRadius(26.dp)
+                .background(GlanceTheme.colors.widgetBackground)
+                .padding(horizontal = 10.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = GlanceModifier
-                    .defaultWeight()
-                    .clickable(actionStartActivity<MainActivity>()),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = GlanceModifier
-                        .size(40.dp)
-                        .cornerRadius(16.dp)
-                        .background(
-                            if (isActive) GlanceTheme.colors.primary else GlanceTheme.colors.secondaryContainer
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        provider = ImageProvider(R.drawable.ic_silicon_tile),
-                        contentDescription = "Silicon",
-                        modifier = GlanceModifier.size(22.dp),
-                        colorFilter = ColorFilter.tint(
-                            if (isActive) GlanceTheme.colors.onPrimary else GlanceTheme.colors.onSecondaryContainer
-                        )
-                    )
-                }
-                Spacer(modifier = GlanceModifier.width(12.dp))
-                Column {
-                    Text(
-                        text = if (isActive) state.orientation.shortLabel else "Silicon",
-                        style = TextStyle(
-                            color = onContainerColor,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        maxLines = 1
-                    )
-                    Text(
-                        text = if (isActive) "Active" else "Off",
-                        style = TextStyle(
-                            color = onContainerColor,
-                            fontSize = 12.sp
-                        ),
-                        maxLines = 1
-                    )
-                }
-            }
-
-            OrientationPillButton(
-                iconRes = R.drawable.ic_widget_portrait,
-                selected = isActive && state.orientation == OrientationMode.PORTRAIT,
-                mode = OrientationMode.PORTRAIT
-            )
-            Spacer(modifier = GlanceModifier.width(6.dp))
-            OrientationPillButton(
-                iconRes = R.drawable.ic_widget_landscape,
-                selected = isActive && state.orientation == OrientationMode.LANDSCAPE,
-                mode = OrientationMode.LANDSCAPE
-            )
-            Spacer(modifier = GlanceModifier.width(6.dp))
+            // Small colorful Silicon logo (taps open the app)
             Box(
                 modifier = GlanceModifier
-                    .size(40.dp)
-                    .cornerRadius(20.dp)
-                    .background(
-                        if (isActive) GlanceTheme.colors.primary else GlanceTheme.colors.surfaceVariant
-                    )
-                    .clickable(actionRunCallback<ToggleRotationAction>()),
+                    .size(38.dp)
+                    .cornerRadius(12.dp)
+                    .background(GlanceTheme.colors.surfaceVariant)
+                    .clickable(actionStartActivity<MainActivity>()),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    provider = ImageProvider(R.drawable.ic_widget_power),
-                    contentDescription = "Toggle rotation",
-                    modifier = GlanceModifier.size(20.dp),
-                    colorFilter = ColorFilter.tint(
-                        if (isActive) GlanceTheme.colors.onPrimary else GlanceTheme.colors.onSurfaceVariant
-                    )
+                    provider = ImageProvider(R.drawable.ic_silicon_emblem),
+                    contentDescription = "Silicon",
+                    modifier = GlanceModifier.size(24.dp)
                 )
             }
+
+            Spacer(modifier = GlanceModifier.width(8.dp))
+
+            // 4 direct orientation buttons (tap active to turn off)
+            OrientationBarButton(
+                mode = OrientationMode.PORTRAIT,
+                iconRes = R.drawable.ic_widget_phone_portrait,
+                active = state.isActive && state.orientation == OrientationMode.PORTRAIT,
+                modifier = GlanceModifier.defaultWeight().fillMaxHeight()
+            )
+            Spacer(modifier = GlanceModifier.width(6.dp))
+            OrientationBarButton(
+                mode = OrientationMode.LANDSCAPE,
+                iconRes = R.drawable.ic_widget_phone_landscape,
+                active = state.isActive && state.orientation == OrientationMode.LANDSCAPE,
+                modifier = GlanceModifier.defaultWeight().fillMaxHeight()
+            )
+            Spacer(modifier = GlanceModifier.width(6.dp))
+            OrientationBarButton(
+                mode = OrientationMode.REVERSE_PORTRAIT,
+                iconRes = R.drawable.ic_widget_phone_rev_portrait,
+                active = state.isActive && state.orientation == OrientationMode.REVERSE_PORTRAIT,
+                modifier = GlanceModifier.defaultWeight().fillMaxHeight()
+            )
+            Spacer(modifier = GlanceModifier.width(6.dp))
+            OrientationBarButton(
+                mode = OrientationMode.REVERSE_LANDSCAPE,
+                iconRes = R.drawable.ic_widget_phone_rev_landscape,
+                active = state.isActive && state.orientation == OrientationMode.REVERSE_LANDSCAPE,
+                modifier = GlanceModifier.defaultWeight().fillMaxHeight()
+            )
         }
     }
 
     @Composable
-    private fun OrientationPillButton(
+    private fun OrientationBarButton(
+        mode: OrientationMode,
         iconRes: Int,
-        selected: Boolean,
-        mode: OrientationMode
+        active: Boolean,
+        modifier: GlanceModifier = GlanceModifier
     ) {
+        val bg = if (active) GlanceTheme.colors.primary else GlanceTheme.colors.surfaceVariant
+        val fg = if (active) GlanceTheme.colors.onPrimary else GlanceTheme.colors.onSurfaceVariant
         Box(
-            modifier = GlanceModifier
-                .size(40.dp)
+            modifier = modifier
                 .cornerRadius(16.dp)
-                .background(
-                    if (selected) GlanceTheme.colors.primary else GlanceTheme.colors.surface
-                )
+                .background(bg)
                 .clickable(
-                    actionRunCallback<SetOrientationAction>(
+                    actionRunCallback<SelectOrientationAction>(
                         actionParametersOf(OrientationParamKey to mode.id)
                     )
                 ),
@@ -172,10 +128,8 @@ class SiliconBarWidget : GlanceAppWidget() {
             Image(
                 provider = ImageProvider(iconRes),
                 contentDescription = mode.label,
-                modifier = GlanceModifier.size(20.dp),
-                colorFilter = ColorFilter.tint(
-                    if (selected) GlanceTheme.colors.onPrimary else GlanceTheme.colors.onSurface
-                )
+                modifier = GlanceModifier.size(22.dp),
+                colorFilter = ColorFilter.tint(fg)
             )
         }
     }

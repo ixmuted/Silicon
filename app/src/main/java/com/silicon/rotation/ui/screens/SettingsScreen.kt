@@ -59,6 +59,7 @@ import com.silicon.rotation.ui.components.SettingsToggleRow
 fun SettingsScreen(
     state: RotationState,
     accessibilityEnabled: Boolean,
+    tileAdded: Boolean,
     onBack: () -> Unit,
     onOpenSetup: () -> Unit,
     onAddQuickSettingsTile: () -> Unit,
@@ -108,7 +109,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 18.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SettingsGroupCard {
@@ -123,22 +124,24 @@ fun SettingsScreen(
                 SettingsNavigationRow(
                     icon = Icons.Rounded.DashboardCustomize,
                     title = "Quick Settings tile",
+                    trailingText = if (tileAdded) "Added" else null,
                     trailingIcon = Icons.Rounded.ChevronRight,
                     onClick = onAddQuickSettingsTile
                 )
             }
 
             Text(
-                text = "Preferences",
-                style = MaterialTheme.typography.bodyMedium,
+                text = "PREFERENCES",
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 12.dp, top = 4.dp)
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp)
             )
 
             SettingsGroupCard {
                 SettingsNavigationRow(
                     icon = Icons.Rounded.DarkMode,
                     title = "Theme",
+                    subtitle = "Pure OLED dark, crisp white, or system",
                     trailingText = state.themeMode.label,
                     trailingIcon = Icons.Rounded.UnfoldMore,
                     onClick = { showThemeSheet = true }
@@ -148,7 +151,7 @@ fun SettingsScreen(
                     SettingsToggleRow(
                         icon = Icons.Rounded.Palette,
                         title = "Dynamic color",
-                        subtitle = "Match wallpaper palette",
+                        subtitle = "Match wallpaper accent palette",
                         checked = state.dynamicColor,
                         onCheckedChange = onDynamicColorChange
                     )
@@ -188,25 +191,25 @@ fun SettingsScreen(
             }
 
             Text(
-                text = "Widgets",
-                style = MaterialTheme.typography.bodyMedium,
+                text = "WIDGETS",
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 12.dp, top = 4.dp)
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp)
             )
 
             SettingsGroupCard {
                 SettingsNavigationRow(
                     icon = Icons.Rounded.ViewAgenda,
-                    title = "Rectangle widget",
-                    subtitle = "4x1 bar with portrait and landscape buttons",
+                    title = "Bar widget",
+                    subtitle = "4x1 strip with all 4 orientation buttons",
                     trailingIcon = Icons.Rounded.ChevronRight,
                     onClick = onPinBarWidget
                 )
                 SettingsGroupDivider()
                 SettingsNavigationRow(
                     icon = Icons.Rounded.CropSquare,
-                    title = "Square widget",
-                    subtitle = "2x2 compact toggle tile",
+                    title = "Grid widget",
+                    subtitle = "2x2 compact pad with all 4 orientation buttons",
                     trailingIcon = Icons.Rounded.ChevronRight,
                     onClick = onPinSquareWidget
                 )

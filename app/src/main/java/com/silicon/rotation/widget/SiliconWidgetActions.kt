@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.updateAll
 import com.silicon.rotation.MainActivity
 import com.silicon.rotation.data.OrientationMode
 import com.silicon.rotation.service.RotationController
@@ -12,22 +13,7 @@ import com.silicon.rotation.util.SystemIntegration
 
 val OrientationParamKey = ActionParameters.Key<String>("orientation_id")
 
-class ToggleRotationAction : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
-        RotationController.initialize(context)
-        if (!SystemIntegration.isAccessibilityEnabled(context)) {
-            launchSetup(context)
-            return
-        }
-        RotationController.toggle(context)
-    }
-}
-
-class SetOrientationAction : ActionCallback {
+class SelectOrientationAction : ActionCallback {
     override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
@@ -39,22 +25,14 @@ class SetOrientationAction : ActionCallback {
             return
         }
         val mode = OrientationMode.fromId(parameters[OrientationParamKey])
-        RotationController.setOrientation(context, mode, activate = true)
-    }
-}
-
-class CycleOrientationAction : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
-        RotationController.initialize(context)
-        if (!SystemIntegration.isAccessibilityEnabled(context)) {
-            launchSetup(context)
-            return
+        val current = RotationController.state.value
+        if (current.isActive && current.orientation == mode) {
+            RotationController.disable(context)
+        } else {
+            RotationController.setOrientation(context, mode, activate = true)
         }
-        RotationController.cycleOrientation(context)
+        runCatching { SiliconBarWidget().updateAll(context) }
+        runCatching { SiliconSquareWidget().updateAll(context) }
     }
 }
 

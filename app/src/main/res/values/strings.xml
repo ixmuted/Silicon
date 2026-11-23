@@ -4,9 +4,9 @@
     <string name="accessibility_service_label">Silicon Rotation Control</string>
     <string name="accessibility_service_description">Controls screen orientation across apps and returns to portrait when leaving an app or receiving a call.</string>
     <string name="widget_bar_label">Silicon Bar</string>
-    <string name="widget_bar_description">Wide rotation control bar with quick orientation toggles.</string>
-    <string name="widget_square_label">Silicon Square</string>
-    <string name="widget_square_description">Compact square toggle for screen rotation.</string>
+    <string name="widget_bar_description">4x1 strip with all 4 screen orientation controls.</string>
+    <string name="widget_square_label">Silicon Grid</string>
+    <string name="widget_square_description">2x2 compact pad with all 4 screen orientation controls.</string>
     <string name="notification_channel_name">Active Rotation</string>
     <string name="notification_channel_description">Shown while screen orientation lock is active.</string>
 </resources>

@@ -27,7 +27,7 @@ fun SiliconTheme(
     val useDark = when (themeMode) {
         ThemeMode.SYSTEM -> systemDark
         ThemeMode.LIGHT -> false
-        ThemeMode.DARK, ThemeMode.PURE_DARK -> true
+        ThemeMode.DARK -> true
     }
     val context = LocalContext.current
     val view = LocalView.current
@@ -39,26 +39,36 @@ fun SiliconTheme(
             insetsController.isAppearanceLightNavigationBars = !useDark
         }
     }
-    val baseScheme = when {
+
+    val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            if (useDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (useDark) {
+                // Keep Pure OLED Dark surfaces even when Material You dynamic accent is on
+                dynamicDarkColorScheme(context).copy(
+                    background = Color(0xFF000000),
+                    surface = Color(0xFF000000),
+                    surfaceContainerLowest = Color(0xFF000000),
+                    surfaceContainerLow = Color(0xFF0A0A0D),
+                    surfaceContainer = Color(0xFF111116),
+                    surfaceContainerHigh = Color(0xFF1A1A22),
+                    surfaceContainerHighest = Color(0xFF24242F),
+                    outlineVariant = Color(0xFF22222B)
+                )
+            } else {
+                // Keep crisp pure white canvas even when Material You dynamic accent is on
+                dynamicLightColorScheme(context).copy(
+                    background = Color(0xFFFFFFFF),
+                    surface = Color(0xFFFFFFFF),
+                    surfaceContainerLowest = Color(0xFFFFFFFF),
+                    surfaceContainerLow = Color(0xFFFAFBFD),
+                    surfaceContainer = Color(0xFFF6F8FB),
+                    surfaceContainerHigh = Color(0xFFEDF1F7),
+                    outlineVariant = Color(0xFFE5EAF2)
+                )
+            }
         }
         useDark -> SiliconDarkColorScheme
         else -> SiliconLightColorScheme
-    }
-    val colorScheme = if (themeMode == ThemeMode.PURE_DARK) {
-        baseScheme.copy(
-            background = PureDarkBackground,
-            surface = PureDarkBackground,
-            surfaceContainerLowest = PureDarkBackground,
-            surfaceContainerLow = Color(0xFF0E0E10),
-            surfaceContainer = PureDarkCard,
-            surfaceContainerHigh = PureDarkCardHigh,
-            surfaceContainerHighest = PureDarkCardHighest,
-            outlineVariant = PureDarkDivider
-        )
-    } else {
-        baseScheme
     }
 
     MaterialExpressiveTheme(

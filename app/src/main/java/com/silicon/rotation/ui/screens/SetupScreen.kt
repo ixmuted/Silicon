@@ -1,12 +1,21 @@
 package com.silicon.rotation.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -67,6 +76,15 @@ fun SetupScreen(
         notificationPermissionGranted
     ).count { it }
 
+    val animatedProgress by animateFloatAsState(
+        targetValue = completedSteps / 4f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "setup_progress"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,13 +119,14 @@ fun SetupScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 18.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f))
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
@@ -136,7 +155,7 @@ fun SetupScreen(
                         }
                     }
                     LinearProgressIndicator(
-                        progress = { completedSteps / 4f },
+                        progress = { animatedProgress },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp)
@@ -151,7 +170,7 @@ fun SetupScreen(
                 text = "REQUIRED",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 6.dp)
             )
 
             SettingsGroupCard {
@@ -160,6 +179,7 @@ fun SetupScreen(
                     title = "Rotation service",
                     subtitle = "Allows Silicon to rotate apps and detect app switches",
                     completed = accessibilityEnabled,
+                    completedLabel = "Ready",
                     actionLabel = "Enable",
                     onAction = onEnableAccessibility
                 )
@@ -169,7 +189,7 @@ fun SetupScreen(
                 text = "OPTIONAL",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 6.dp)
             )
 
             SettingsGroupCard {
@@ -178,6 +198,7 @@ fun SetupScreen(
                     title = "Quick Settings tile",
                     subtitle = "Toggle orientation directly from the notification panel",
                     completed = tileAdded,
+                    completedLabel = "Added",
                     actionLabel = "Add",
                     onAction = onAddQuickSettingsTile
                 )
@@ -187,6 +208,7 @@ fun SetupScreen(
                     title = "Call detection",
                     subtitle = "Automatically return to portrait for incoming calls",
                     completed = phonePermissionGranted,
+                    completedLabel = "Ready",
                     actionLabel = "Allow",
                     onAction = onRequestPhonePermission
                 )
@@ -196,6 +218,7 @@ fun SetupScreen(
                     title = "Status notification",
                     subtitle = "Show quick controls while rotation is active",
                     completed = notificationPermissionGranted,
+                    completedLabel = "Ready",
                     actionLabel = "Allow",
                     onAction = onRequestNotificationPermission
                 )
@@ -205,15 +228,15 @@ fun SetupScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .padding(horizontal = 18.dp, vertical = 14.dp)
         ) {
             Button(
                 onClick = onBack,
                 enabled = accessibilityEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
+                    .height(54.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -234,6 +257,7 @@ private fun SetupStepRow(
     title: String,
     subtitle: String,
     completed: Boolean,
+    completedLabel: String,
     actionLabel: String,
     onAction: () -> Unit
 ) {
@@ -243,6 +267,7 @@ private fun SetupStepRow(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         },
+        animationSpec = tween(260),
         label = "step_icon_bg"
     )
     val iconTint by animateColorAsState(
@@ -251,6 +276,7 @@ private fun SetupStepRow(
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
+        animationSpec = tween(260),
         label = "step_icon_fg"
     )
 
@@ -268,12 +294,20 @@ private fun SetupStepRow(
                 .background(iconContainer),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = if (completed) Icons.Rounded.Check else icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(20.dp)
-            )
+            AnimatedContent(
+                targetState = completed,
+                transitionSpec = {
+                    (scaleIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn()) togetherWith fadeOut(tween(120))
+                },
+                label = "step_icon_anim"
+            ) { done ->
+                Icon(
+                    imageVector = if (done) Icons.Rounded.Check else icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -287,27 +321,35 @@ private fun SetupStepRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        if (completed) {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer
-            ) {
-                Text(
-                    text = "Ready",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                )
-            }
-        } else {
-            FilledTonalButton(
-                onClick = onAction,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = actionLabel,
-                    style = MaterialTheme.typography.labelLarge
-                )
+        AnimatedContent(
+            targetState = completed,
+            transitionSpec = {
+                (scaleIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) + fadeIn()) togetherWith fadeOut(tween(120))
+            },
+            label = "step_trailing_anim"
+        ) { done ->
+            if (done) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer
+                ) {
+                    Text(
+                        text = completedLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                    )
+                }
+            } else {
+                FilledTonalButton(
+                    onClick = onAction,
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(
+                        text = actionLabel,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             }
         }
     }

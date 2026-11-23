@@ -1,10 +1,22 @@
 package com.silicon.rotation.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,11 +25,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,14 +38,11 @@ import androidx.compose.material.icons.automirrored.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.PowerSettingsNew
-import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,15 +50,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.silicon.rotation.data.OrientationMode
 import com.silicon.rotation.data.RotationState
+import com.silicon.rotation.ui.components.ModernPhoneIcon
 import com.silicon.rotation.ui.components.SettingsGroupCard
 import com.silicon.rotation.ui.components.SettingsGroupDivider
 import com.silicon.rotation.ui.components.SettingsToggleRow
 import com.silicon.rotation.ui.components.SiliconLogo
+import com.silicon.rotation.ui.components.bounceClick
 
 @Composable
 fun HomeScreen(
@@ -68,8 +81,8 @@ fun HomeScreen(
             .statusBarsPadding()
             .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -79,7 +92,7 @@ fun HomeScreen(
             SiliconLogo(
                 themeMode = state.themeMode,
                 dynamicColor = state.dynamicColor,
-                size = 44.dp
+                size = 42.dp
             )
             Text(
                 text = "Silicon",
@@ -87,19 +100,22 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.weight(1f)
             )
-            FilledTonalIconButton(
-                onClick = onOpenSettings,
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
+            Surface(
+                modifier = Modifier
+                    .size(44.dp)
+                    .bounceClick(onClick = onOpenSettings),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f))
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Tune,
-                    contentDescription = "Settings"
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Rounded.Tune,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
 
@@ -118,8 +134,8 @@ fun HomeScreen(
         Text(
             text = "ORIENTATION",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 6.dp, top = 2.dp)
         )
 
         OrientationGrid(
@@ -148,7 +164,7 @@ fun HomeScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -157,10 +173,10 @@ private fun SetupPromptBanner(onOpenSetup: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .clickable(onClick = onOpenSetup),
+            .bounceClick(onClick = onOpenSetup),
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.tertiaryContainer
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
@@ -171,7 +187,7 @@ private fun SetupPromptBanner(onOpenSetup: () -> Unit) {
                 imageVector = Icons.Rounded.VerifiedUser,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(22.dp)
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -207,7 +223,17 @@ private fun HeroControlCard(
         } else {
             MaterialTheme.colorScheme.surfaceContainer
         },
+        animationSpec = tween(320),
         label = "hero_bg"
+    )
+    val cardBorderColor by animateColorAsState(
+        targetValue = if (isActive) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+        } else {
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+        },
+        animationSpec = tween(320),
+        label = "hero_border"
     )
     val badgeBg by animateColorAsState(
         targetValue = if (isActive) {
@@ -215,6 +241,7 @@ private fun HeroControlCard(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         },
+        animationSpec = tween(320),
         label = "badge_bg"
     )
     val badgeIconTint by animateColorAsState(
@@ -223,10 +250,15 @@ private fun HeroControlCard(
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
+        animationSpec = tween(320),
         label = "badge_tint"
     )
     val iconRotation by animateFloatAsState(
         targetValue = if (isActive) state.orientation.iconDegrees else 0f,
+        animationSpec = spring(
+            dampingRatio = 0.62f,
+            stiffness = 280f
+        ),
         label = "hero_rotation"
     )
     val titleColor = if (isActive) {
@@ -235,60 +267,104 @@ private fun HeroControlCard(
         MaterialTheme.colorScheme.onSurface
     }
 
+    val pulseTransition = rememberInfiniteTransition(label = "live_dot")
+    val dotAlpha by pulseTransition.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "dot_alpha"
+    )
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(36.dp),
-        color = cardColor
+        shape = RoundedCornerShape(32.dp),
+        color = cardColor,
+        border = BorderStroke(1.dp, cardBorderColor)
     ) {
         Column(
             modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text(
-                text = "ROTATION CONTROL",
-                style = MaterialTheme.typography.labelMedium,
-                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(84.dp)
-                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomEnd = 30.dp, bottomStart = 12.dp))
-                        .background(badgeBg),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Smartphone,
-                        contentDescription = null,
-                        tint = badgeIconTint,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .rotate(iconRotation)
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .alpha(if (isActive) dotAlpha else 0.4f)
+                        .background(
+                            if (isActive) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                )
+                Text(
+                    text = "ROTATION CONTROL",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(80.dp),
+                    shape = RoundedCornerShape(26.dp),
+                    color = badgeBg,
+                    border = BorderStroke(
+                        1.dp,
+                        if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
                     )
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        ModernPhoneIcon(
+                            tint = badgeIconTint,
+                            rotationDegrees = iconRotation,
+                            size = 42.dp,
+                            filledScreen = isActive
+                        )
+                    }
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(
-                        text = when {
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    AnimatedContent(
+                        targetState = when {
                             !accessibilityEnabled -> "Setup needed"
                             isActive -> "Active"
-                            else -> "Off"
+                            else -> "Standby"
                         },
-                        style = MaterialTheme.typography.displaySmall,
-                        color = titleColor
-                    )
-                    Text(
-                        text = when {
+                        transitionSpec = {
+                            (fadeIn(tween(220)) + scaleIn(initialScale = 0.94f)) togetherWith fadeOut(tween(140))
+                        },
+                        label = "status_title"
+                    ) { statusText ->
+                        Text(
+                            text = statusText,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = titleColor
+                        )
+                    }
+                    AnimatedContent(
+                        targetState = when {
                             !accessibilityEnabled -> "Accessibility service is off"
-                            isActive -> "${state.orientation.label} is locked"
+                            isActive -> "${state.orientation.label} locked"
                             else -> "Ready for ${state.defaultOrientation.label.lowercase()}"
                         },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = titleColor.copy(alpha = 0.8f)
-                    )
+                        transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(140)) },
+                        label = "status_subtitle"
+                    ) { subText ->
+                        Text(
+                            text = subText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = titleColor.copy(alpha = 0.78f)
+                        )
+                    }
                 }
             }
 
@@ -296,8 +372,8 @@ private fun HeroControlCard(
                 onClick = onPrimaryAction,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
+                    .height(54.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -306,7 +382,7 @@ private fun HeroControlCard(
                 Icon(
                     imageVector = Icons.Rounded.PowerSettingsNew,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(19.dp)
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
@@ -359,9 +435,19 @@ private fun OrientationTile(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.primary
         } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
+            MaterialTheme.colorScheme.surfaceContainer
         },
+        animationSpec = tween(260),
         label = "tile_bg"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+        },
+        animationSpec = tween(260),
+        label = "tile_border"
     )
     val contentColor by animateColorAsState(
         targetValue = if (selected) {
@@ -369,36 +455,33 @@ private fun OrientationTile(
         } else {
             MaterialTheme.colorScheme.onSurface
         },
+        animationSpec = tween(260),
         label = "tile_fg"
     )
-    val bottomStartRadius by animateDpAsState(
-        targetValue = if (selected) 14.dp else 28.dp,
+    val cornerRadius by animateDpAsState(
+        targetValue = if (selected) 26.dp else 20.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
         label = "tile_corner"
     )
-    val topRadius by animateDpAsState(
-        targetValue = if (selected) 36.dp else 28.dp,
-        label = "tile_top"
+    val iconScale by animateFloatAsState(
+        targetValue = if (selected) 1.08f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "tile_icon_scale"
     )
 
     Surface(
         modifier = modifier
-            .height(92.dp)
-            .clip(
-                RoundedCornerShape(
-                    topStart = topRadius,
-                    topEnd = topRadius,
-                    bottomEnd = topRadius,
-                    bottomStart = bottomStartRadius
-                )
-            )
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(
-            topStart = topRadius,
-            topEnd = topRadius,
-            bottomEnd = topRadius,
-            bottomStart = bottomStartRadius
-        ),
-        color = bgColor
+            .height(94.dp)
+            .bounceClick(onClick = onClick),
+        shape = RoundedCornerShape(cornerRadius),
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor)
     ) {
         Column(
             modifier = Modifier
@@ -407,18 +490,20 @@ private fun OrientationTile(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Smartphone,
-                contentDescription = null,
+            ModernPhoneIcon(
                 tint = contentColor,
-                modifier = Modifier
-                    .size(26.dp)
-                    .rotate(mode.iconDegrees)
+                rotationDegrees = mode.iconDegrees,
+                size = 28.dp,
+                filledScreen = selected,
+                modifier = Modifier.graphicsLayer {
+                    scaleX = iconScale
+                    scaleY = iconScale
+                }
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = mode.label,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleSmall,
                 color = contentColor,
                 maxLines = 1
             )
