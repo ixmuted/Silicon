@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.AccessibilityNew
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
@@ -26,7 +27,6 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CropSquare
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.DashboardCustomize
-import androidx.compose.material.icons.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.ScreenRotation
@@ -171,7 +171,7 @@ fun SettingsScreen(
                 )
                 SettingsGroupDivider()
                 SettingsToggleRow(
-                    icon = Icons.Rounded.ExitToApp,
+                    icon = Icons.AutoMirrored.Rounded.ExitToApp,
                     title = "Stop on app switch",
                     subtitle = "Disable when leaving the current app",
                     checked = state.autoDisableOnLeaveApp,
