@@ -81,10 +81,10 @@ fun HomeScreen(
             .statusBarsPadding()
             .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .padding(horizontal = 18.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Minimalist top bar: bare colorful emblem + wordmark + ghost settings trigger
+        // Minimal top bar: original colorful Silicon emblem + wordmark + settings button
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -93,7 +93,7 @@ fun HomeScreen(
             Image(
                 painter = painterResource(id = R.drawable.ic_silicon_emblem),
                 contentDescription = "Silicon",
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(30.dp)
             )
             Text(
                 text = "Silicon",
@@ -103,7 +103,7 @@ fun HomeScreen(
             )
             Surface(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(38.dp)
                     .bounceClick(onClick = onOpenSettings),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainer,
@@ -132,7 +132,7 @@ fun HomeScreen(
             }
         )
 
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = "ORIENTATION",
                 style = MaterialTheme.typography.labelMedium,
@@ -148,7 +148,7 @@ fun HomeScreen(
             )
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = "AUTOMATION",
                 style = MaterialTheme.typography.labelMedium,
@@ -159,7 +159,7 @@ fun HomeScreen(
                 SettingsToggleRow(
                     icon = Icons.Rounded.Call,
                     title = "Return on calls",
-                    subtitle = "Switch to portrait when a call arrives",
+                    subtitle = "Portrait when a call arrives",
                     checked = state.returnOnCalls,
                     onCheckedChange = onReturnOnCallsChange
                 )
@@ -167,14 +167,12 @@ fun HomeScreen(
                 SettingsToggleRow(
                     icon = Icons.AutoMirrored.Rounded.ExitToApp,
                     title = "Stop on app switch",
-                    subtitle = "Disable when leaving the current app",
+                    subtitle = "Disable when leaving the app",
                     checked = state.autoDisableOnLeaveApp,
                     onCheckedChange = onAutoDisableChange
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -184,37 +182,37 @@ private fun SetupPromptBanner(onOpenSetup: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .bounceClick(onClick = onOpenSetup),
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.tertiaryContainer,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f))
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Icon(
                 imageVector = Icons.Rounded.VerifiedUser,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.size(20.dp)
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(18.dp)
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Finish setup",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "Enable rotation service to unlock controls",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.85f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Icon(
                 imageVector = Icons.Rounded.ChevronRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -230,20 +228,20 @@ private fun HeroControlCard(
     val isActive = state.isActive && accessibilityEnabled
     val cardBorder by animateColorAsState(
         targetValue = if (isActive) {
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f)
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
         } else {
             MaterialTheme.colorScheme.outlineVariant
         },
-        animationSpec = tween(280),
+        animationSpec = tween(260),
         label = "hero_border"
     )
     val iconTint by animateColorAsState(
         targetValue = if (isActive) {
-            MaterialTheme.colorScheme.secondary
+            MaterialTheme.colorScheme.onSurface
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        animationSpec = tween(280),
+        animationSpec = tween(260),
         label = "hero_icon_tint"
     )
     val iconRotation by animateFloatAsState(
@@ -268,38 +266,38 @@ private fun HeroControlCard(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
         border = BorderStroke(1.dp, cardBorder)
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp)
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(7.dp)
+                                .size(6.dp)
                                 .clip(CircleShape)
                                 .alpha(if (isActive) dotAlpha else 0.35f)
                                 .background(
-                                    if (isActive) MaterialTheme.colorScheme.secondary
+                                    if (isActive) MaterialTheme.colorScheme.tertiary
                                     else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                         )
                         Text(
-                            text = if (isActive) "LOCKED" else "STANDBY",
+                            text = if (isActive) "ACTIVE" else "STANDBY",
                             style = MaterialTheme.typography.labelMedium,
-                            color = if (isActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     AnimatedContent(
@@ -308,19 +306,19 @@ private fun HeroControlCard(
                             isActive -> state.orientation.label
                             else -> "Off"
                         },
-                        transitionSpec = { fadeIn(tween(200)) togetherWith fadeOut(tween(140)) },
+                        transitionSpec = { fadeIn(tween(180)) togetherWith fadeOut(tween(120)) },
                         label = "hero_title"
                     ) { label ->
                         Text(
                             text = label,
-                            style = MaterialTheme.typography.headlineLarge,
+                            style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Text(
                         text = when {
                             !accessibilityEnabled -> "Service not enabled"
-                            isActive -> "Active across apps"
+                            isActive -> "Locked across apps"
                             else -> "Default: ${state.defaultOrientation.shortLabel}"
                         },
                         style = MaterialTheme.typography.bodySmall,
@@ -329,20 +327,16 @@ private fun HeroControlCard(
                 }
 
                 Surface(
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier.size(54.dp),
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    border = BorderStroke(
-                        1.dp,
-                        if (isActive) MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)
-                        else MaterialTheme.colorScheme.outlineVariant
-                    )
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         ModernPhoneIcon(
                             tint = iconTint,
                             rotationDegrees = iconRotation,
-                            size = 34.dp,
+                            size = 28.dp,
                             filledScreen = isActive
                         )
                     }
@@ -353,17 +347,17 @@ private fun HeroControlCard(
                 onClick = onPrimaryAction,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
+                    .height(46.dp),
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
-                    contentColor = if (isActive) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Icon(
                     imageVector = Icons.Rounded.PowerSettingsNew,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(17.dp)
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
@@ -386,11 +380,11 @@ private fun OrientationGrid(
     onSelect: (OrientationMode) -> Unit
 ) {
     val rows = OrientationMode.entries.chunked(2)
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         rows.forEach { rowItems ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 rowItems.forEach { mode ->
                     OrientationTile(
@@ -418,7 +412,7 @@ private fun OrientationTile(
         } else {
             MaterialTheme.colorScheme.surfaceContainer
         },
-        animationSpec = tween(220),
+        animationSpec = tween(200),
         label = "tile_bg"
     )
     val borderColor by animateColorAsState(
@@ -427,7 +421,7 @@ private fun OrientationTile(
         } else {
             MaterialTheme.colorScheme.outlineVariant
         },
-        animationSpec = tween(220),
+        animationSpec = tween(200),
         label = "tile_border"
     )
     val contentColor by animateColorAsState(
@@ -436,7 +430,7 @@ private fun OrientationTile(
         } else {
             MaterialTheme.colorScheme.onSurface
         },
-        animationSpec = tween(220),
+        animationSpec = tween(200),
         label = "tile_fg"
     )
     val iconScale by animateFloatAsState(
@@ -450,33 +444,33 @@ private fun OrientationTile(
 
     Surface(
         modifier = modifier
-            .height(84.dp)
+            .height(68.dp)
             .bounceClick(onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         color = bgColor,
         border = BorderStroke(1.dp, borderColor)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ModernPhoneIcon(
                 tint = contentColor,
                 rotationDegrees = mode.iconDegrees,
-                size = 24.dp,
+                size = 21.dp,
                 filledScreen = selected,
                 modifier = Modifier.graphicsLayer {
                     scaleX = iconScale
                     scaleY = iconScale
                 }
             )
-            Spacer(modifier = Modifier.height(7.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = mode.label,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = contentColor,
                 maxLines = 1
             )

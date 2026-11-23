@@ -17,7 +17,7 @@ class SiliconPreferences(context: Context) {
             autoDisableOnLeaveApp = prefs.getBoolean(KEY_AUTO_DISABLE_LEAVE, true),
             showNotification = prefs.getBoolean(KEY_SHOW_NOTIFICATION, true),
             themeMode = ThemeMode.fromId(prefs.getString(KEY_THEME_MODE, ThemeMode.SYSTEM.id)),
-            dynamicColor = prefs.getBoolean(KEY_DYNAMIC_COLOR, true)
+            dynamicColor = prefs.getBoolean(KEY_DYNAMIC_COLOR, false)
         )
     }
 

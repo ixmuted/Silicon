@@ -8,7 +8,7 @@ data class RotationState(
     val autoDisableOnLeaveApp: Boolean = true,
     val showNotification: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val dynamicColor: Boolean = true,
+    val dynamicColor: Boolean = false,
     val isServiceConnected: Boolean = false,
     val isPausedForCall: Boolean = false
 )
