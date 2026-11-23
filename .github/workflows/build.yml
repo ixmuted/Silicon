@@ -18,9 +18,23 @@ jobs:
         with:
           gradle-version: '9.9.2'
       - name: Build APK
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
-          gradle :app:assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk Silicon.apk
+          if [ -n "$SIGNING_KEYSTORE_BASE64" ]; then
+            export KEYSTORE_PATH="$RUNNER_TEMP/release.jks"
+            printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+            trap 'rm -f "$KEYSTORE_PATH"' EXIT
+            gradle :app:assembleRelease --no-daemon
+            cp app/build/outputs/apk/release/app-release.apk Silicon.apk
+          else
+            echo "Signing secrets not configured yet — building debug APK."
+            gradle :app:assembleDebug --no-daemon
+            cp app/build/outputs/apk/debug/app-debug.apk Silicon.apk
+          fi
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
