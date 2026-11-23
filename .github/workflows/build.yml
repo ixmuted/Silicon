@@ -26,7 +26,10 @@ jobs:
         run: |
           if [ -n "$SIGNING_KEYSTORE_BASE64" ]; then
             export KEYSTORE_PATH="$RUNNER_TEMP/release.jks"
-            printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+            export KEYSTORE_PASSWORD="$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d '[:space:]')"
+            export KEY_ALIAS="$(printf '%s' "$KEY_ALIAS" | tr -d '[:space:]')"
+            export KEY_PASSWORD="$(printf '%s' "$KEY_PASSWORD" | tr -d '[:space:]')"
+            printf '%s' "$SIGNING_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > "$KEYSTORE_PATH"
             trap 'rm -f "$KEYSTORE_PATH"' EXIT
             gradle :app:assembleRelease --no-daemon
             cp app/build/outputs/apk/release/app-release.apk Silicon.apk
