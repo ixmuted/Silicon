@@ -7,12 +7,16 @@ plugins {
 
 android {
     namespace = "com.silicon.rotation"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         applicationId = "com.silicon.rotation"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
 
