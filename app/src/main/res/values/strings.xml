@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Silicon</string>
+    <string name="accessibility_service_label">Silicon Rotation Control</string>
+    <string name="accessibility_service_description">Controls screen orientation across apps and returns to portrait when leaving an app or receiving a call.</string>
+    <string name="widget_bar_label">Silicon Bar</string>
+    <string name="widget_bar_description">Wide rotation control bar with quick orientation toggles.</string>
+    <string name="widget_square_label">Silicon Square</string>
+    <string name="widget_square_description">Compact square toggle for screen rotation.</string>
+    <string name="notification_channel_name">Active Rotation</string>
+    <string name="notification_channel_description">Shown while screen orientation lock is active.</string>
+</resources>

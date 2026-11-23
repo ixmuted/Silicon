@@ -1,0 +1,3 @@
+-keep class com.silicon.rotation.service.** { *; }
+-keep class com.silicon.rotation.widget.** { *; }
+-dontwarn androidx.glance.**
