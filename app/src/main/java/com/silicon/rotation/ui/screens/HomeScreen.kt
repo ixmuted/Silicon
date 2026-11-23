@@ -21,9 +21,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material.icons.rounded.Tune
@@ -140,7 +140,7 @@ fun HomeScreen(
             )
             SettingsGroupDivider()
             SettingsToggleRow(
-                icon = Icons.Rounded.ExitToApp,
+                icon = Icons.AutoMirrored.Rounded.ExitToApp,
                 title = "Stop when I leave the app",
                 subtitle = "Disable once you switch away",
                 checked = state.autoDisableOnLeaveApp,
