@@ -9,6 +9,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -22,15 +24,20 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Icon
@@ -47,19 +54,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.silicon.rotation.R
 import com.silicon.rotation.service.RotationController
 import com.silicon.rotation.ui.screens.HomeScreen
 import com.silicon.rotation.ui.screens.SettingsScreen
 import com.silicon.rotation.ui.screens.SetupScreen
+import com.silicon.rotation.ui.theme.SiliconDisplayFont
 import com.silicon.rotation.ui.theme.SiliconTheme
 import com.silicon.rotation.util.SystemIntegration
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private enum class SiliconRoute {
     HOME,
@@ -76,6 +91,7 @@ fun SiliconNavApp(
     val lifecycleOwner = LocalLifecycleOwner.current
     val state by RotationController.state.collectAsStateWithLifecycle()
 
+    var showSplash by rememberSaveable { mutableStateOf(true) }
     var accessibilityEnabled by remember {
         mutableStateOf(SystemIntegration.isAccessibilityEnabled(context))
     }
@@ -159,7 +175,7 @@ fun SiliconNavApp(
         }
     }
 
-    BackHandler(enabled = route != SiliconRoute.HOME) {
+    BackHandler(enabled = !showSplash && route != SiliconRoute.HOME) {
         routeName = SiliconRoute.HOME.name
     }
 
@@ -236,7 +252,7 @@ fun SiliconNavApp(
                         },
                         onPinSquareWidget = {
                             if (!SystemIntegration.requestPinSquareWidget(context)) {
-                                Toast.makeText(context, "Add Silicon Square from your launcher widgets", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Add Silicon Grid from your launcher widgets", Toast.LENGTH_SHORT).show()
                             } else {
                                 successBannerText = "Grid widget pinned"
                             }
@@ -263,7 +279,7 @@ fun SiliconNavApp(
 
             // Floating animated success pill for Quick Settings tile & widget actions
             AnimatedVisibility(
-                visible = successBannerText != null,
+                visible = successBannerText != null && !showSplash,
                 enter = slideInVertically(
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -285,8 +301,8 @@ fun SiliconNavApp(
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.tertiaryContainer,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)),
-                    shadowElevation = 6.dp
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)),
+                    shadowElevation = 4.dp
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
@@ -307,6 +323,107 @@ fun SiliconNavApp(
                     }
                 }
             }
+
+            // Minimalist Claude-style launch splash screen respecting system theme
+            AnimatedVisibility(
+                visible = showSplash,
+                enter = fadeIn(tween(1)),
+                exit = fadeOut(tween(340, easing = FastOutSlowInEasing))
+            ) {
+                SiliconLaunchSplash(onFinished = { showSplash = false })
+            }
         }
+    }
+}
+
+@Composable
+private fun SiliconLaunchSplash(onFinished: () -> Unit) {
+    val systemDark = isSystemInDarkTheme()
+    val bgColor = if (systemDark) Color(0xFF000000) else Color(0xFFFFFFFF)
+    val wordmarkColor = if (systemDark) Color(0xFFF8FAFC) else Color(0xFF0A0B0E)
+    val footerColor = if (systemDark) Color(0xFF64748B) else Color(0xFF94A3B8)
+
+    val logoScale = remember { Animatable(0.82f) }
+    val logoRotation = remember { Animatable(-24f) }
+    val textAlpha = remember { Animatable(0f) }
+    val textOffsetX = remember { Animatable(12f) }
+
+    LaunchedEffect(Unit) {
+        launch {
+            logoScale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = 0.68f,
+                    stiffness = 260f
+                )
+            )
+        }
+        launch {
+            logoRotation.animateTo(
+                targetValue = 0f,
+                animationSpec = spring(
+                    dampingRatio = 0.72f,
+                    stiffness = 200f
+                )
+            )
+        }
+        delay(90)
+        launch {
+            textAlpha.animateTo(1f, tween(380, easing = FastOutSlowInEasing))
+        }
+        launch {
+            textOffsetX.animateTo(0f, tween(420, easing = FastOutSlowInEasing))
+        }
+        delay(1250)
+        onFinished()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(bgColor)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+    ) {
+        Row(
+            modifier = Modifier.align(Alignment.Center),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_silicon_emblem),
+                contentDescription = "Silicon",
+                modifier = Modifier
+                    .size(44.dp)
+                    .graphicsLayer {
+                        scaleX = logoScale.value
+                        scaleY = logoScale.value
+                        rotationZ = logoRotation.value
+                    }
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Silicon",
+                fontFamily = SiliconDisplayFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 36.sp,
+                letterSpacing = (-1.1).sp,
+                color = wordmarkColor,
+                modifier = Modifier.graphicsLayer {
+                    alpha = textAlpha.value
+                    translationX = textOffsetX.value
+                }
+            )
+        }
+
+        Text(
+            text = "ROTATION CONTROL",
+            style = MaterialTheme.typography.labelMedium,
+            letterSpacing = 2.4.sp,
+            color = footerColor,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 36.dp)
+                .graphicsLayer { alpha = textAlpha.value * 0.85f }
+        )
     }
 }

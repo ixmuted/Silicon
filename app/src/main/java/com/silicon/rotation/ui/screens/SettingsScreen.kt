@@ -85,7 +85,7 @@ fun SettingsScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 10.dp)
         ) {
             IconButton(
                 onClick = onBack,
@@ -109,110 +109,130 @@ fun SettingsScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 20.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            SettingsGroupCard {
-                SettingsNavigationRow(
-                    icon = Icons.Rounded.AccessibilityNew,
-                    title = "Setup & permissions",
-                    trailingText = if (accessibilityEnabled) "Ready" else "Action needed",
-                    trailingIcon = Icons.Rounded.ChevronRight,
-                    onClick = onOpenSetup
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "GENERAL",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
-                SettingsGroupDivider()
-                SettingsNavigationRow(
-                    icon = Icons.Rounded.DashboardCustomize,
-                    title = "Quick Settings tile",
-                    trailingText = if (tileAdded) "Added" else null,
-                    trailingIcon = Icons.Rounded.ChevronRight,
-                    onClick = onAddQuickSettingsTile
-                )
-            }
-
-            Text(
-                text = "PREFERENCES",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 6.dp, top = 4.dp)
-            )
-
-            SettingsGroupCard {
-                SettingsNavigationRow(
-                    icon = Icons.Rounded.DarkMode,
-                    title = "Theme",
-                    subtitle = "Pure OLED dark, crisp white, or system",
-                    trailingText = state.themeMode.label,
-                    trailingIcon = Icons.Rounded.UnfoldMore,
-                    onClick = { showThemeSheet = true }
-                )
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                SettingsGroupCard {
+                    SettingsNavigationRow(
+                        icon = Icons.Rounded.AccessibilityNew,
+                        title = "Setup & permissions",
+                        trailingText = if (accessibilityEnabled) "Ready" else "Action needed",
+                        trailingIcon = Icons.Rounded.ChevronRight,
+                        onClick = onOpenSetup
+                    )
                     SettingsGroupDivider()
-                    SettingsToggleRow(
-                        icon = Icons.Rounded.Palette,
-                        title = "Dynamic color",
-                        subtitle = "Match wallpaper accent palette",
-                        checked = state.dynamicColor,
-                        onCheckedChange = onDynamicColorChange
+                    SettingsNavigationRow(
+                        icon = Icons.Rounded.DashboardCustomize,
+                        title = "Quick Settings tile",
+                        trailingText = if (tileAdded) "Added" else null,
+                        trailingIcon = Icons.Rounded.ChevronRight,
+                        onClick = onAddQuickSettingsTile
                     )
                 }
-                SettingsGroupDivider()
-                SettingsNavigationRow(
-                    icon = Icons.Rounded.ScreenRotation,
-                    title = "Default orientation",
-                    trailingText = state.defaultOrientation.shortLabel,
-                    trailingIcon = Icons.Rounded.UnfoldMore,
-                    onClick = { showOrientationSheet = true }
-                )
-                SettingsGroupDivider()
-                SettingsToggleRow(
-                    icon = Icons.Rounded.Call,
-                    title = "Return on calls",
-                    subtitle = "Portrait when a call arrives",
-                    checked = state.returnOnCalls,
-                    onCheckedChange = onReturnOnCallsChange
-                )
-                SettingsGroupDivider()
-                SettingsToggleRow(
-                    icon = Icons.AutoMirrored.Rounded.ExitToApp,
-                    title = "Stop on app switch",
-                    subtitle = "Disable when leaving the current app",
-                    checked = state.autoDisableOnLeaveApp,
-                    onCheckedChange = onAutoDisableChange
-                )
-                SettingsGroupDivider()
-                SettingsToggleRow(
-                    icon = Icons.Rounded.Notifications,
-                    title = "Active notification",
-                    subtitle = "Quick controls while locked",
-                    checked = state.showNotification,
-                    onCheckedChange = onShowNotificationChange
-                )
             }
 
-            Text(
-                text = "WIDGETS",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 6.dp, top = 4.dp)
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "APPEARANCE",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+                SettingsGroupCard {
+                    SettingsNavigationRow(
+                        icon = Icons.Rounded.DarkMode,
+                        title = "Theme",
+                        subtitle = "Pure dark, crisp white, or system",
+                        trailingText = state.themeMode.label,
+                        trailingIcon = Icons.Rounded.UnfoldMore,
+                        onClick = { showThemeSheet = true }
+                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        SettingsGroupDivider()
+                        SettingsToggleRow(
+                            icon = Icons.Rounded.Palette,
+                            title = "Dynamic color",
+                            subtitle = "Match wallpaper accent",
+                            checked = state.dynamicColor,
+                            onCheckedChange = onDynamicColorChange
+                        )
+                    }
+                }
+            }
 
-            SettingsGroupCard {
-                SettingsNavigationRow(
-                    icon = Icons.Rounded.ViewAgenda,
-                    title = "Bar widget",
-                    subtitle = "4x1 strip with all 4 orientation buttons",
-                    trailingIcon = Icons.Rounded.ChevronRight,
-                    onClick = onPinBarWidget
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "BEHAVIOR",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
-                SettingsGroupDivider()
-                SettingsNavigationRow(
-                    icon = Icons.Rounded.CropSquare,
-                    title = "Grid widget",
-                    subtitle = "2x2 compact pad with all 4 orientation buttons",
-                    trailingIcon = Icons.Rounded.ChevronRight,
-                    onClick = onPinSquareWidget
+                SettingsGroupCard {
+                    SettingsNavigationRow(
+                        icon = Icons.Rounded.ScreenRotation,
+                        title = "Default orientation",
+                        trailingText = state.defaultOrientation.shortLabel,
+                        trailingIcon = Icons.Rounded.UnfoldMore,
+                        onClick = { showOrientationSheet = true }
+                    )
+                    SettingsGroupDivider()
+                    SettingsToggleRow(
+                        icon = Icons.Rounded.Call,
+                        title = "Return on calls",
+                        subtitle = "Portrait when a call arrives",
+                        checked = state.returnOnCalls,
+                        onCheckedChange = onReturnOnCallsChange
+                    )
+                    SettingsGroupDivider()
+                    SettingsToggleRow(
+                        icon = Icons.AutoMirrored.Rounded.ExitToApp,
+                        title = "Stop on app switch",
+                        subtitle = "Disable when leaving the current app",
+                        checked = state.autoDisableOnLeaveApp,
+                        onCheckedChange = onAutoDisableChange
+                    )
+                    SettingsGroupDivider()
+                    SettingsToggleRow(
+                        icon = Icons.Rounded.Notifications,
+                        title = "Active notification",
+                        subtitle = "Quick controls while locked",
+                        checked = state.showNotification,
+                        onCheckedChange = onShowNotificationChange
+                    )
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "WIDGETS",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
+                SettingsGroupCard {
+                    SettingsNavigationRow(
+                        icon = Icons.Rounded.ViewAgenda,
+                        title = "Bar widget",
+                        subtitle = "4x1 strip with all 4 orientation buttons",
+                        trailingIcon = Icons.Rounded.ChevronRight,
+                        onClick = onPinBarWidget
+                    )
+                    SettingsGroupDivider()
+                    SettingsNavigationRow(
+                        icon = Icons.Rounded.CropSquare,
+                        title = "Grid widget",
+                        subtitle = "2x2 pad with all 4 orientation buttons",
+                        trailingIcon = Icons.Rounded.ChevronRight,
+                        onClick = onPinSquareWidget
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -223,7 +243,7 @@ fun SettingsScreen(
         ModalBottomSheet(
             onDismissRequest = { showThemeSheet = false },
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -255,7 +275,7 @@ fun SettingsScreen(
         ModalBottomSheet(
             onDismissRequest = { showOrientationSheet = false },
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -294,20 +314,20 @@ private fun SelectionSheetRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.titleMedium,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f)
         )
         if (selected) {
             Icon(
                 imageVector = Icons.Rounded.Check,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.secondary
             )
         }
     }

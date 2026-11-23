@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,11 +37,11 @@ import androidx.compose.material.icons.rounded.DashboardCustomize
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,11 +51,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.silicon.rotation.R
 import com.silicon.rotation.data.RotationState
 import com.silicon.rotation.ui.components.SettingsGroupCard
 import com.silicon.rotation.ui.components.SettingsGroupDivider
-import com.silicon.rotation.ui.components.SiliconLogo
 
 @Composable
 fun SetupScreen(
@@ -95,7 +97,7 @@ fun SetupScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 10.dp)
         ) {
             IconButton(
                 onClick = onBack,
@@ -119,27 +121,27 @@ fun SetupScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 20.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(22.dp),
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        SiliconLogo(
-                            themeMode = state.themeMode,
-                            dynamicColor = state.dynamicColor,
-                            size = 48.dp
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_silicon_emblem),
+                            contentDescription = "Silicon",
+                            modifier = Modifier.size(36.dp)
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -149,7 +151,7 @@ fun SetupScreen(
                             )
                             Text(
                                 text = "$completedSteps of 4 configured",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -158,85 +160,88 @@ fun SetupScreen(
                         progress = { animatedProgress },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        strokeCap = StrokeCap.Round,
-                        trackColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                            .height(5.dp)
+                            .clip(CircleShape),
+                        color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        strokeCap = StrokeCap.Round
                     )
                 }
             }
 
-            Text(
-                text = "REQUIRED",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 6.dp)
-            )
-
-            SettingsGroupCard {
-                SetupStepRow(
-                    icon = Icons.Rounded.AccessibilityNew,
-                    title = "Rotation service",
-                    subtitle = "Allows Silicon to rotate apps and detect app switches",
-                    completed = accessibilityEnabled,
-                    completedLabel = "Ready",
-                    actionLabel = "Enable",
-                    onAction = onEnableAccessibility
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "REQUIRED",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
+                SettingsGroupCard {
+                    SetupStepRow(
+                        icon = Icons.Rounded.AccessibilityNew,
+                        title = "Rotation service",
+                        subtitle = "Allows Silicon to rotate apps and detect switches",
+                        completed = accessibilityEnabled,
+                        completedLabel = "Ready",
+                        actionLabel = "Enable",
+                        onAction = onEnableAccessibility
+                    )
+                }
             }
 
-            Text(
-                text = "OPTIONAL",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 6.dp)
-            )
-
-            SettingsGroupCard {
-                SetupStepRow(
-                    icon = Icons.Rounded.DashboardCustomize,
-                    title = "Quick Settings tile",
-                    subtitle = "Toggle orientation directly from the notification panel",
-                    completed = tileAdded,
-                    completedLabel = "Added",
-                    actionLabel = "Add",
-                    onAction = onAddQuickSettingsTile
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "OPTIONAL",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
-                SettingsGroupDivider()
-                SetupStepRow(
-                    icon = Icons.Rounded.Call,
-                    title = "Call detection",
-                    subtitle = "Automatically return to portrait for incoming calls",
-                    completed = phonePermissionGranted,
-                    completedLabel = "Ready",
-                    actionLabel = "Allow",
-                    onAction = onRequestPhonePermission
-                )
-                SettingsGroupDivider()
-                SetupStepRow(
-                    icon = Icons.Rounded.Notifications,
-                    title = "Status notification",
-                    subtitle = "Show quick controls while rotation is active",
-                    completed = notificationPermissionGranted,
-                    completedLabel = "Ready",
-                    actionLabel = "Allow",
-                    onAction = onRequestNotificationPermission
-                )
+                SettingsGroupCard {
+                    SetupStepRow(
+                        icon = Icons.Rounded.DashboardCustomize,
+                        title = "Quick Settings tile",
+                        subtitle = "Toggle directly from the shade",
+                        completed = tileAdded,
+                        completedLabel = "Added",
+                        actionLabel = "Add",
+                        onAction = onAddQuickSettingsTile
+                    )
+                    SettingsGroupDivider()
+                    SetupStepRow(
+                        icon = Icons.Rounded.Call,
+                        title = "Call detection",
+                        subtitle = "Return to portrait during calls",
+                        completed = phonePermissionGranted,
+                        completedLabel = "Ready",
+                        actionLabel = "Allow",
+                        onAction = onRequestPhonePermission
+                    )
+                    SettingsGroupDivider()
+                    SetupStepRow(
+                        icon = Icons.Rounded.Notifications,
+                        title = "Status notification",
+                        subtitle = "Quick controls while locked",
+                        completed = notificationPermissionGranted,
+                        completedLabel = "Ready",
+                        actionLabel = "Allow",
+                        onAction = onRequestNotificationPermission
+                    )
+                }
             }
         }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 14.dp)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
             Button(
                 onClick = onBack,
                 enabled = accessibilityEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(18.dp),
+                    .height(50.dp),
+                shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -267,29 +272,29 @@ private fun SetupStepRow(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         },
-        animationSpec = tween(260),
+        animationSpec = tween(240),
         label = "step_icon_bg"
     )
     val iconTint by animateColorAsState(
         targetValue = if (completed) {
-            MaterialTheme.colorScheme.onTertiaryContainer
+            MaterialTheme.colorScheme.tertiary
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        animationSpec = tween(260),
+        animationSpec = tween(240),
         label = "step_icon_fg"
     )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
+                .size(38.dp)
                 .clip(CircleShape)
                 .background(iconContainer),
             contentAlignment = Alignment.Center
@@ -305,7 +310,7 @@ private fun SetupStepRow(
                     imageVector = if (done) Icons.Rounded.Check else icon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -317,7 +322,7 @@ private fun SetupStepRow(
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -330,24 +335,26 @@ private fun SetupStepRow(
         ) { done ->
             if (done) {
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = CircleShape,
                     color = MaterialTheme.colorScheme.tertiaryContainer
                 ) {
                     Text(
                         text = completedLabel,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
             } else {
-                FilledTonalButton(
+                OutlinedButton(
                     onClick = onAction,
-                    shape = RoundedCornerShape(14.dp)
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Text(
                         text = actionLabel,
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
