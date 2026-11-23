@@ -16,7 +16,7 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.13'
+          gradle-version: '9.4.1'
       - name: Build Debug APK
         run: gradle :app:assembleDebug --no-daemon
       - name: Upload Debug APK
