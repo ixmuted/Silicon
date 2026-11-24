@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.silicon.rotation"
+    namespace = "com.silicon"
     compileSdk {
         version = release(37) {
             minorApiLevel = 1
@@ -14,7 +14,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.silicon.rotation"
+        applicationId = "com.silicon"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
@@ -80,6 +80,7 @@ kotlin {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)

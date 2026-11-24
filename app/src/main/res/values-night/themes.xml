@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Silicon" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowBackground">#000000</item>
+        <item name="android:windowBackground">#181715</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.Silicon.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#181715</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.Silicon</item>
     </style>
 </resources>

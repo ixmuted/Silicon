@@ -1,7 +1,7 @@
--keep class com.silicon.rotation.SiliconApp { <init>(); }
--keep class com.silicon.rotation.MainActivity { <init>(); }
--keep class com.silicon.rotation.service.** { *; }
--keep class com.silicon.rotation.widget.** { *; }
+-keep class com.silicon.SiliconApp { <init>(); }
+-keep class com.silicon.MainActivity { <init>(); }
+-keep class com.silicon.service.** { *; }
+-keep class com.silicon.widget.** { *; }
 -keep class * implements androidx.glance.appwidget.action.ActionCallback {
     public <init>();
 }
