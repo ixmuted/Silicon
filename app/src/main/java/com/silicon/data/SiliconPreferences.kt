@@ -13,7 +13,7 @@ class SiliconPreferences(context: Context) {
             isActive = prefs.getBoolean(KEY_ACTIVE, false),
             orientation = OrientationMode.fromId(prefs.getString(KEY_ORIENTATION, OrientationMode.LANDSCAPE.id)),
             defaultOrientation = OrientationMode.fromId(prefs.getString(KEY_DEFAULT_ORIENTATION, OrientationMode.LANDSCAPE.id)),
-            returnOnCalls = prefs.getBoolean(KEY_RETURN_ON_CALLS, true),
+            returnOnCalls = prefs.getBoolean(KEY_RETURN_ON_CALLS, false),
             autoDisableOnLeaveApp = prefs.getBoolean(KEY_AUTO_DISABLE_LEAVE, true),
             showNotification = prefs.getBoolean(KEY_SHOW_NOTIFICATION, true),
             themeMode = ThemeMode.fromId(prefs.getString(KEY_THEME_MODE, ThemeMode.SYSTEM.id)),
