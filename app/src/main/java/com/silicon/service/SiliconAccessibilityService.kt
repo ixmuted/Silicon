@@ -4,6 +4,8 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.WindowManager
@@ -13,6 +15,7 @@ import com.silicon.data.RotationState
 
 class SiliconAccessibilityService : AccessibilityService() {
 
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
     private var overlayParams: WindowManager.LayoutParams? = null
@@ -67,6 +70,14 @@ class SiliconAccessibilityService : AccessibilityService() {
     }
 
     fun syncOverlayState(state: RotationState) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            applySyncOverlayState(state)
+        } else {
+            mainHandler.post { applySyncOverlayState(state) }
+        }
+    }
+
+    private fun applySyncOverlayState(state: RotationState) {
         if (state.isActive) {
             val targetOrientation = if (state.isPausedForCall) {
                 OrientationMode.PORTRAIT
@@ -162,6 +173,7 @@ class SiliconAccessibilityService : AccessibilityService() {
     }
 
     private fun teardown() {
+        mainHandler.removeCallbacksAndMessages(null)
         callStateMonitor?.stop()
         removeOverlay()
         anchoredPackage = null
