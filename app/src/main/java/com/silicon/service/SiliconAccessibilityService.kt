@@ -3,16 +3,13 @@ package com.silicon.service
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
-import androidx.core.app.ServiceCompat
 import com.silicon.data.OrientationMode
 import com.silicon.data.RotationState
 
@@ -26,31 +23,15 @@ class SiliconAccessibilityService : AccessibilityService() {
     private var anchoredPackage: String? = null
     private var lastObservedAppPackage: String? = null
     private var cachedImePackage: String? = null
-    private var isForegroundPromoted: Boolean = false
 
     override fun onServiceConnected() {
         super.onServiceConnected()
         windowManager = getSystemService(WindowManager::class.java)
         cachedImePackage = resolveCurrentImePackage()
-        promoteToForeground(RotationController.state.value)
         callStateMonitor = CallStateMonitor(this) { inCall ->
             RotationController.onCallStateChanged(this, inCall)
         }
         RotationController.attachService(this)
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-        return START_STICKY
-    }
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        super.onTaskRemoved(rootIntent)
-        val state = RotationController.state.value
-        promoteToForeground(state)
-        if (state.isActive) {
-            applySyncOverlayState(state)
-        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -83,6 +64,14 @@ class SiliconAccessibilityService : AccessibilityService() {
         return super.onUnbind(intent)
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        val state = RotationController.state.value
+        if (state.isActive) {
+            syncOverlayState(state)
+        }
+    }
+
     override fun onDestroy() {
         teardown()
         super.onDestroy()
@@ -96,40 +85,7 @@ class SiliconAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun promoteToForeground(state: RotationState) {
-        val shouldPromote = state.isActive || state.showNotification
-        if (!shouldPromote) {
-            if (isForegroundPromoted) {
-                runCatching {
-                    ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-                }
-                isForegroundPromoted = false
-            }
-            return
-        }
-        val notification = SiliconNotificationManager.buildForegroundNotification(
-            context = this,
-            isActive = state.isActive,
-            orientation = state.orientation
-        )
-        runCatching {
-            val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-            } else {
-                0
-            }
-            ServiceCompat.startForeground(
-                this,
-                SiliconNotificationManager.NOTIFICATION_ID,
-                notification,
-                type
-            )
-            isForegroundPromoted = true
-        }
-    }
-
     private fun applySyncOverlayState(state: RotationState) {
-        promoteToForeground(state)
         if (state.isActive) {
             val targetOrientation = if (state.isPausedForCall) {
                 OrientationMode.PORTRAIT
@@ -137,6 +93,11 @@ class SiliconAccessibilityService : AccessibilityService() {
                 state.orientation
             }
             applyOverlay(targetOrientation.activityInfoValue)
+            if (state.showNotification) {
+                SiliconNotificationManager.startForeground(this, targetOrientation)
+            } else {
+                SiliconNotificationManager.stopForeground(this)
+            }
             if (state.autoDisableOnLeaveApp) {
                 if (anchoredPackage == null) {
                     anchoredPackage = lastObservedAppPackage?.takeUnless { isIgnoredPackage(it) }
@@ -153,6 +114,7 @@ class SiliconAccessibilityService : AccessibilityService() {
             }
         } else {
             removeOverlay()
+            SiliconNotificationManager.stopForeground(this)
             anchoredPackage = null
             updateEventMonitoring(false)
             callStateMonitor?.stop()
@@ -228,13 +190,8 @@ class SiliconAccessibilityService : AccessibilityService() {
         mainHandler.removeCallbacksAndMessages(null)
         callStateMonitor?.stop()
         removeOverlay()
+        SiliconNotificationManager.stopForeground(this)
         anchoredPackage = null
-        if (isForegroundPromoted) {
-            runCatching {
-                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            }
-            isForegroundPromoted = false
-        }
         RotationController.detachService(this)
     }
 
