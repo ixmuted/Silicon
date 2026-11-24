@@ -3,6 +3,8 @@
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:name=".SiliconApp"
@@ -28,6 +30,7 @@
         <service
             android:name=".service.SiliconAccessibilityService"
             android:exported="false"
+            android:foregroundServiceType="specialUse"
             android:label="@string/accessibility_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -36,6 +39,9 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Screen orientation control accessibility overlay service" />
         </service>
 
         <service
