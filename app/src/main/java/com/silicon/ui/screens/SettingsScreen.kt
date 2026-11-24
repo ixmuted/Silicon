@@ -41,8 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.silicon.data.OrientationMode
 import com.silicon.data.RotationState
@@ -71,12 +69,6 @@ fun SettingsScreen(
     onAutoDisableChange: (Boolean) -> Unit,
     onShowNotificationChange: (Boolean) -> Unit
 ) {
-    val context = LocalContext.current
-    val versionName = remember {
-        runCatching {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        }.getOrNull().orEmpty()
-    }
     var showThemeSheet by remember { mutableStateOf(false) }
     var showOrientationSheet by remember { mutableStateOf(false) }
 
@@ -189,22 +181,13 @@ fun SettingsScreen(
                 }
             }
 
-            Text(
-                text = "Silicon $versionName",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
     if (showThemeSheet) {
         SelectionSheet(
-            title = "Theme",
+            title = null,
             onDismiss = { showThemeSheet = false }
         ) {
             ThemeMode.entries.forEach { mode ->
@@ -242,7 +225,7 @@ fun SettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectionSheet(
-    title: String,
+    title: String?,
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -257,12 +240,14 @@ private fun SelectionSheet(
                 .navigationBarsPadding()
                 .padding(bottom = 16.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-            )
+            if (title != null) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+            }
             content()
         }
     }
