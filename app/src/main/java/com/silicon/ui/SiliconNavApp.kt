@@ -80,6 +80,7 @@ fun SiliconNavApp(
     var notificationPermissionGranted by remember {
         mutableStateOf(SystemIntegration.hasNotificationPermission(context))
     }
+    var pendingEnableReturnOnCalls by remember { mutableStateOf(false) }
     var tileAdded by rememberSaveable { mutableStateOf(false) }
     var successBannerText by remember { mutableStateOf<String?>(null) }
     var lastBannerText by remember { mutableStateOf("") }
@@ -101,6 +102,12 @@ fun SiliconNavApp(
         }
     }
 
+    LaunchedEffect(phonePermissionGranted, state.returnOnCalls) {
+        if (!phonePermissionGranted && state.returnOnCalls) {
+            RotationController.setReturnOnCalls(context, false)
+        }
+    }
+
     LaunchedEffect(successBannerText) {
         if (successBannerText != null) {
             lastBannerText = successBannerText.orEmpty()
@@ -113,7 +120,11 @@ fun SiliconNavApp(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 accessibilityEnabled = SystemIntegration.isAccessibilityEnabled(context)
-                phonePermissionGranted = SystemIntegration.hasPhoneStatePermission(context)
+                val hasPhone = SystemIntegration.hasPhoneStatePermission(context)
+                phonePermissionGranted = hasPhone
+                if (!hasPhone && RotationController.state.value.returnOnCalls) {
+                    RotationController.setReturnOnCalls(context, false)
+                }
                 notificationPermissionGranted = SystemIntegration.hasNotificationPermission(context)
             }
         }
@@ -125,12 +136,47 @@ fun SiliconNavApp(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         phonePermissionGranted = granted
+        if (pendingEnableReturnOnCalls) {
+            pendingEnableReturnOnCalls = false
+            if (granted) {
+                RotationController.setReturnOnCalls(context, true)
+            } else {
+                RotationController.setReturnOnCalls(context, false)
+                Toast.makeText(
+                    context,
+                    "Phone permission is required for Return on calls",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } else if (!granted && RotationController.state.value.returnOnCalls) {
+            RotationController.setReturnOnCalls(context, false)
+        }
     }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         notificationPermissionGranted = granted
+    }
+
+    val handleReturnOnCallsChange: (Boolean) -> Unit = { enabled ->
+        if (!enabled) {
+            pendingEnableReturnOnCalls = false
+            RotationController.setReturnOnCalls(context, false)
+        } else if (SystemIntegration.hasPhoneStatePermission(context)) {
+            phonePermissionGranted = true
+            RotationController.setReturnOnCalls(context, true)
+        } else {
+            phonePermissionGranted = false
+            pendingEnableReturnOnCalls = true
+            phonePermissionLauncher.launch(Manifest.permission.READ_PHONE_STATE)
+        }
+    }
+
+    val effectiveState = if (phonePermissionGranted) {
+        state
+    } else {
+        state.copy(returnOnCalls = false)
     }
 
     val addTileAction: () -> Unit = {
@@ -160,7 +206,7 @@ fun SiliconNavApp(
         routeName = SiliconRoute.HOME.name
     }
 
-    SiliconTheme(themeMode = state.themeMode) {
+    SiliconTheme(themeMode = effectiveState.themeMode) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -177,23 +223,18 @@ fun SiliconNavApp(
             ) { currentRoute ->
                 when (currentRoute) {
                     SiliconRoute.HOME -> HomeScreen(
-                        state = state,
+                        state = effectiveState,
                         accessibilityEnabled = accessibilityEnabled,
                         onToggleActive = { RotationController.toggle(context) },
                         onSelectOrientation = { RotationController.setOrientation(context, it, activate = true) },
-                        onReturnOnCallsChange = { enabled ->
-                            RotationController.setReturnOnCalls(context, enabled)
-                            if (enabled && !phonePermissionGranted) {
-                                phonePermissionLauncher.launch(Manifest.permission.READ_PHONE_STATE)
-                            }
-                        },
+                        onReturnOnCallsChange = handleReturnOnCallsChange,
                         onAutoDisableChange = { RotationController.setAutoDisableOnLeaveApp(context, it) },
                         onOpenSettings = { routeName = SiliconRoute.SETTINGS.name },
                         onOpenSetup = { routeName = SiliconRoute.SETUP.name }
                     )
 
                     SiliconRoute.SETUP -> SetupScreen(
-                        state = state,
+                        state = effectiveState,
                         accessibilityEnabled = accessibilityEnabled,
                         phonePermissionGranted = phonePermissionGranted,
                         notificationPermissionGranted = notificationPermissionGranted,
@@ -212,7 +253,7 @@ fun SiliconNavApp(
                     )
 
                     SiliconRoute.SETTINGS -> SettingsScreen(
-                        state = state,
+                        state = effectiveState,
                         accessibilityEnabled = accessibilityEnabled,
                         tileAdded = tileAdded,
                         onBack = { routeName = SiliconRoute.HOME.name },
@@ -221,25 +262,16 @@ fun SiliconNavApp(
                         onPinBarWidget = {
                             if (!SystemIntegration.requestPinBarWidget(context)) {
                                 Toast.makeText(context, "Add Silicon Bar from your launcher widgets", Toast.LENGTH_SHORT).show()
-                            } else {
-                                successBannerText = "Bar widget pinned"
                             }
                         },
                         onPinSquareWidget = {
                             if (!SystemIntegration.requestPinSquareWidget(context)) {
                                 Toast.makeText(context, "Add Silicon Grid from your launcher widgets", Toast.LENGTH_SHORT).show()
-                            } else {
-                                successBannerText = "Grid widget pinned"
                             }
                         },
                         onThemeModeChange = { RotationController.setThemeMode(context, it) },
                         onDefaultOrientationChange = { RotationController.setDefaultOrientation(context, it) },
-                        onReturnOnCallsChange = { enabled ->
-                            RotationController.setReturnOnCalls(context, enabled)
-                            if (enabled && !phonePermissionGranted) {
-                                phonePermissionLauncher.launch(Manifest.permission.READ_PHONE_STATE)
-                            }
-                        },
+                        onReturnOnCallsChange = handleReturnOnCallsChange,
                         onAutoDisableChange = { RotationController.setAutoDisableOnLeaveApp(context, it) },
                         onShowNotificationChange = { enabled ->
                             RotationController.setShowNotification(context, enabled)
