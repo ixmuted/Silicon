@@ -134,7 +134,10 @@ object RotationController {
         preferences?.saveShowNotification(enabled)
         _state.update { it.copy(showNotification = enabled) }
         val current = _state.value
-        SiliconNotificationManager.update(context, current.isActive && current.isServiceConnected, current.orientation, enabled)
+        serviceRef?.syncOverlayState(current)
+        if (serviceRef == null) {
+            SiliconNotificationManager.update(context, current.isActive && current.isServiceConnected, current.orientation, enabled)
+        }
     }
 
     fun setThemeMode(context: Context, mode: ThemeMode) {
@@ -172,12 +175,14 @@ object RotationController {
     private fun syncAll(context: Context) {
         val current = _state.value
         serviceRef?.syncOverlayState(current)
-        SiliconNotificationManager.update(
-            context = context,
-            isActive = current.isActive && current.isServiceConnected,
-            orientation = current.orientation,
-            enabled = current.showNotification
-        )
+        if (serviceRef == null) {
+            SiliconNotificationManager.update(
+                context = context,
+                isActive = current.isActive && current.isServiceConnected,
+                orientation = current.orientation,
+                enabled = current.showNotification
+            )
+        }
         requestSystemSync(context)
     }
 
