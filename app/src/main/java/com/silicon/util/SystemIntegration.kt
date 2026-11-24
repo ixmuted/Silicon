@@ -10,8 +10,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
+import android.widget.RemoteViews
+import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import com.silicon.R
 import com.silicon.service.SiliconAccessibilityService
@@ -75,17 +78,35 @@ object SystemIntegration {
     }
 
     fun requestPinBarWidget(context: Context): Boolean {
-        return requestPinWidget(context, SiliconBarWidgetReceiver::class.java)
+        return requestPinWidget(
+            context = context,
+            receiverClass = SiliconBarWidgetReceiver::class.java,
+            previewLayoutRes = R.layout.widget_bar_preview
+        )
     }
 
     fun requestPinSquareWidget(context: Context): Boolean {
-        return requestPinWidget(context, SiliconSquareWidgetReceiver::class.java)
+        return requestPinWidget(
+            context = context,
+            receiverClass = SiliconSquareWidgetReceiver::class.java,
+            previewLayoutRes = R.layout.widget_square_preview
+        )
     }
 
-    private fun requestPinWidget(context: Context, receiverClass: Class<*>): Boolean {
+    private fun requestPinWidget(
+        context: Context,
+        receiverClass: Class<*>,
+        @LayoutRes previewLayoutRes: Int
+    ): Boolean {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         if (!appWidgetManager.isRequestPinAppWidgetSupported) return false
         val provider = ComponentName(context, receiverClass)
-        return appWidgetManager.requestPinAppWidget(provider, null, null)
+        val extras = Bundle().apply {
+            putParcelable(
+                AppWidgetManager.EXTRA_APPWIDGET_PREVIEW,
+                RemoteViews(context.packageName, previewLayoutRes)
+            )
+        }
+        return appWidgetManager.requestPinAppWidget(provider, extras, null)
     }
 }
