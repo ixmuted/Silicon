@@ -10,6 +10,8 @@ import com.silicon.MainActivity
 import com.silicon.data.OrientationMode
 import com.silicon.service.RotationController
 import com.silicon.util.SystemIntegration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 val OrientationParamKey = ActionParameters.Key<String>("orientation_id")
 
@@ -19,18 +21,22 @@ class SelectOrientationAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        RotationController.initialize(context)
-        if (!SystemIntegration.isAccessibilityEnabled(context)) {
-            launchSetup(context)
-            return
+        val handled = withContext(Dispatchers.Main.immediate) {
+            RotationController.initialize(context)
+            if (!SystemIntegration.isAccessibilityEnabled(context)) {
+                launchSetup(context)
+                return@withContext false
+            }
+            val mode = OrientationMode.fromId(parameters[OrientationParamKey])
+            val current = RotationController.state.value
+            if (current.isActive && current.orientation == mode) {
+                RotationController.disable(context)
+            } else {
+                RotationController.setOrientation(context, mode, activate = true)
+            }
+            true
         }
-        val mode = OrientationMode.fromId(parameters[OrientationParamKey])
-        val current = RotationController.state.value
-        if (current.isActive && current.orientation == mode) {
-            RotationController.disable(context)
-        } else {
-            RotationController.setOrientation(context, mode, activate = true)
-        }
+        if (!handled) return
         runCatching { SiliconBarWidget().updateAll(context) }
         runCatching { SiliconSquareWidget().updateAll(context) }
     }
