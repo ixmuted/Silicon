@@ -27,10 +27,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessibilityNew
+import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DashboardCustomize
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -57,24 +60,31 @@ import com.silicon.ui.components.SettingsGroupDivider
 fun SetupScreen(
     state: RotationState,
     accessibilityEnabled: Boolean,
+    batteryOptimizationIgnored: Boolean,
+    isXiaomiDevice: Boolean,
     phonePermissionGranted: Boolean,
     notificationPermissionGranted: Boolean,
     tileAdded: Boolean,
     onBack: () -> Unit,
     onEnableAccessibility: () -> Unit,
+    onRequestIgnoreBatteryOptimizations: () -> Unit,
+    onOpenAutostartSettings: () -> Unit,
+    onOpenAppSettings: () -> Unit,
     onAddQuickSettingsTile: () -> Unit,
     onRequestPhonePermission: () -> Unit,
     onRequestNotificationPermission: () -> Unit
 ) {
+    val totalSteps = 5
     val completedSteps = listOf(
         accessibilityEnabled,
+        batteryOptimizationIgnored,
         tileAdded,
         phonePermissionGranted,
         notificationPermissionGranted
     ).count { it }
 
     val animatedProgress by animateFloatAsState(
-        targetValue = completedSteps / 4f,
+        targetValue = completedSteps / totalSteps.toFloat(),
         animationSpec = tween(400),
         label = "setup_progress"
     )
@@ -88,7 +98,7 @@ fun SetupScreen(
     ) {
         ScreenHeader(
             title = "Set up Silicon",
-            subtitle = "$completedSteps of 4 complete",
+            subtitle = "$completedSteps of $totalSteps complete",
             onBack = onBack
         )
 
@@ -124,6 +134,43 @@ fun SetupScreen(
                         actionLabel = "Enable",
                         onAction = onEnableAccessibility
                     )
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                SectionLabel("Background reliability")
+                SettingsGroupCard {
+                    SetupStepRow(
+                        icon = Icons.Rounded.BatteryChargingFull,
+                        title = "Unrestricted battery",
+                        subtitle = "Keeps the accessibility service alive when apps are cleared",
+                        completed = batteryOptimizationIgnored,
+                        completedLabel = "Ready",
+                        actionLabel = "Allow",
+                        onAction = onRequestIgnoreBatteryOptimizations
+                    )
+                    if (isXiaomiDevice) {
+                        SettingsGroupDivider()
+                        SetupStepRow(
+                            icon = Icons.Rounded.RestartAlt,
+                            title = "MIUI Autostart",
+                            subtitle = "Enable Autostart so Redmi/MIUI won't stop Silicon from recents",
+                            completed = false,
+                            completedLabel = "Open",
+                            actionLabel = "Open",
+                            onAction = onOpenAutostartSettings
+                        )
+                        SettingsGroupDivider()
+                        SetupStepRow(
+                            icon = Icons.Rounded.Tune,
+                            title = "App battery saver",
+                            subtitle = "Set Battery saver to No restrictions & lock Silicon in Recents",
+                            completed = false,
+                            completedLabel = "App info",
+                            actionLabel = "App info",
+                            onAction = onOpenAppSettings
+                        )
+                    }
                 }
             }
 
