@@ -7,6 +7,7 @@ import com.silicon.data.OrientationMode
 import com.silicon.data.RotationState
 import com.silicon.data.SiliconPreferences
 import com.silicon.data.ThemeMode
+import com.silicon.util.SystemIntegration
 import com.silicon.widget.SiliconWidgetUpdater
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +28,14 @@ object RotationController {
         val prefs = SiliconPreferences(context)
         preferences = prefs
         val loaded = prefs.loadState()
-        _state.value = loaded.copy(isServiceConnected = serviceRef != null)
+        val effectiveReturnOnCalls = loaded.returnOnCalls && SystemIntegration.hasPhoneStatePermission(context)
+        if (loaded.returnOnCalls && !effectiveReturnOnCalls) {
+            prefs.saveReturnOnCalls(false)
+        }
+        _state.value = loaded.copy(
+            returnOnCalls = effectiveReturnOnCalls,
+            isServiceConnected = serviceRef != null
+        )
     }
 
     fun attachService(service: SiliconAccessibilityService) {
@@ -108,8 +116,9 @@ object RotationController {
 
     fun setReturnOnCalls(context: Context, enabled: Boolean) {
         initialize(context)
-        preferences?.saveReturnOnCalls(enabled)
-        _state.update { it.copy(returnOnCalls = enabled) }
+        val effective = enabled && SystemIntegration.hasPhoneStatePermission(context)
+        preferences?.saveReturnOnCalls(effective)
+        _state.update { it.copy(returnOnCalls = effective) }
         serviceRef?.syncOverlayState(_state.value)
     }
 
