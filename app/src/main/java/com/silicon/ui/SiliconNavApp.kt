@@ -80,6 +80,10 @@ fun SiliconNavApp(
     var notificationPermissionGranted by remember {
         mutableStateOf(SystemIntegration.hasNotificationPermission(context))
     }
+    var batteryOptimizationIgnored by remember {
+        mutableStateOf(SystemIntegration.isBatteryOptimizationIgnored(context))
+    }
+    val isXiaomiDevice = remember { SystemIntegration.isXiaomiDevice() }
     var pendingEnableReturnOnCalls by remember { mutableStateOf(false) }
     var tileAdded by rememberSaveable { mutableStateOf(false) }
     var successBannerText by remember { mutableStateOf<String?>(null) }
@@ -126,6 +130,7 @@ fun SiliconNavApp(
                     RotationController.setReturnOnCalls(context, false)
                 }
                 notificationPermissionGranted = SystemIntegration.hasNotificationPermission(context)
+                batteryOptimizationIgnored = SystemIntegration.isBatteryOptimizationIgnored(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -236,11 +241,22 @@ fun SiliconNavApp(
                     SiliconRoute.SETUP -> SetupScreen(
                         state = effectiveState,
                         accessibilityEnabled = accessibilityEnabled,
+                        batteryOptimizationIgnored = batteryOptimizationIgnored,
+                        isXiaomiDevice = isXiaomiDevice,
                         phonePermissionGranted = phonePermissionGranted,
                         notificationPermissionGranted = notificationPermissionGranted,
                         tileAdded = tileAdded,
                         onBack = { routeName = SiliconRoute.HOME.name },
                         onEnableAccessibility = { SystemIntegration.openAccessibilitySettings(context) },
+                        onRequestIgnoreBatteryOptimizations = {
+                            SystemIntegration.requestIgnoreBatteryOptimizations(context)
+                        },
+                        onOpenAutostartSettings = {
+                            SystemIntegration.openMiuiAutostartSettings(context)
+                        },
+                        onOpenAppSettings = {
+                            SystemIntegration.openAppDetailsSettings(context)
+                        },
                         onAddQuickSettingsTile = addTileAction,
                         onRequestPhonePermission = {
                             phonePermissionLauncher.launch(Manifest.permission.READ_PHONE_STATE)
