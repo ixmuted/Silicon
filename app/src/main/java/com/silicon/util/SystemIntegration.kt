@@ -12,6 +12,7 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.text.TextUtils
 import android.view.accessibility.AccessibilityManager
 import android.widget.RemoteViews
 import androidx.annotation.LayoutRes
@@ -25,14 +26,44 @@ import com.silicon.widget.SiliconSquareWidgetReceiver
 object SystemIntegration {
 
     fun isAccessibilityEnabled(context: Context): Boolean {
-        val am = context.getSystemService(AccessibilityManager::class.java) ?: return false
-        val enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+        val am = context.getSystemService(AccessibilityManager::class.java)
         val expectedComponent = ComponentName(context, SiliconAccessibilityService::class.java)
-        return enabledServices.any {
-            val serviceInfo = it.resolveInfo.serviceInfo
-            serviceInfo.packageName == expectedComponent.packageName &&
-                serviceInfo.name == expectedComponent.className
+        val expectedFlat = expectedComponent.flattenToString()
+        val expectedShort = expectedComponent.flattenToShortString()
+
+        if (am != null) {
+            val enabledServices = runCatching {
+                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            }.getOrDefault(emptyList())
+            val boundInManager = enabledServices.any {
+                val serviceInfo = it.resolveInfo?.serviceInfo ?: return@any false
+                serviceInfo.packageName == expectedComponent.packageName &&
+                    serviceInfo.name == expectedComponent.className
+            }
+            if (boundInManager) return true
         }
+
+        val accessibilityEnabled = runCatching {
+            Settings.Secure.getInt(context.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED, 0)
+        }.getOrDefault(0)
+        if (accessibilityEnabled != 1) return false
+
+        val enabledSetting = runCatching {
+            Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+        }.getOrNull().orEmpty()
+
+        if (enabledSetting.isBlank()) return false
+        val splitter = TextUtils.SimpleStringSplitter(':')
+        splitter.setString(enabledSetting)
+        while (splitter.hasNext()) {
+            val componentString = splitter.next()
+            if (componentString.equals(expectedFlat, ignoreCase = true) ||
+                componentString.equals(expectedShort, ignoreCase = true)
+            ) {
+                return true
+            }
+        }
+        return false
     }
 
     fun hasPhoneStatePermission(context: Context): Boolean {
